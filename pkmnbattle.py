@@ -8,22 +8,24 @@ import random
 from bisect import bisect
 import os, sys
 from time import sleep
- 
+
+directory = os.path.dirname(os.path.abspath(__file__))
+
 # greyscale.. the following strings represent
 # 7 tonal ranges, from lighter to darker.
 # for a given pixel tonal level, choose a character
 # at random from that range.
- 
+
 greyscale = [
-            " ",
-            " ",
-            ".,-",
-            "_ivc=!/|\\~",
-            "gjez2]/(YL)t[+T7Vf",
-            "mdK4ZGbNDXY5P*Q",
-            "W8KMA",
-            "#%$"
-            ]
+			" ",
+			" ",
+			".,-",
+			"_ivc=!/|\\~",
+			"gjez2]/(YL)t[+T7Vf",
+			"mdK4ZGbNDXY5P*Q",
+			"W8KMA",
+			"#%$"
+			]
  
 # using the bisect class to put luminosity values
 # in various ranges.
@@ -204,30 +206,31 @@ def capture(opponent, pokeball):
 
 def drawASCII(num):
 	# im=Image.open(r"/Users/Tyler_iMac/Downloads/Sprites/151.png")
-    #im=Image.open(r"/Users/Tyler_iMac/Downloads/Sprites/%03d.png"%num)
-    im=Image.open(r"/u/tcorley/Documents/Sprites/%03d.png"%num)
-    # im=im.resize((n+85, n),Image.BILINEAR)
-    # im=im.resize((40, 19),Image.BILINEAR)
-    im=im.resize((104, 70),Image.BILINEAR)
-    im=im.convert("L") # convert to mono
-     
-    # now, work our way over the pixels
-    # build up str
-     
-    str=""
-    for y in range(0,im.size[1]):
-        for x in range(0,im.size[0]):
-            lum=255-im.getpixel((x,y))
-            row=bisect(zonebounds,lum)
-            possibles=greyscale[row]
-            str=str+possibles[random.randint(0,len(possibles)-1)]
-        str=str+"\n"
-     
-    checkString = str.split('\n')
-    for string in checkString:
-    	if(string.isspace()):
-    		checkString.pop(checkString.index(string))
-    return '\n'.join(checkString)
+	#im=Image.open(r"/Users/Tyler_iMac/Downloads/Sprites/%03d.png"%num)
+	file = os.path.join(directory, 'sprites', '%03d.png'%num)
+	im = Image.open(file)
+	# im=im.resize((n+85, n),Image.BILINEAR)
+	# im=im.resize((40, 19),Image.BILINEAR)
+	im=im.resize((104, 70),Image.BILINEAR)
+	im=im.convert("L") # convert to mono
+	 
+	# now, work our way over the pixels
+	# build up str
+	 
+	str=""
+	for y in range(0,im.size[1]):
+		for x in range(0,im.size[0]):
+			lum=255-im.getpixel((x,y))
+			row=bisect(zonebounds,lum)
+			possibles=greyscale[row]
+			str=str+possibles[random.randint(0,len(possibles)-1)]
+		str=str+"\n"
+	 
+	checkString = str.split('\n')
+	for string in checkString:
+		if(string.isspace()):
+			checkString.pop(checkString.index(string))
+	return '\n'.join(checkString)
 
 
 if __name__ == "__main__":
