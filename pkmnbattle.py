@@ -1,174 +1,239 @@
-#!/etc/bin/ python
-# Pokemon capture code
+"""Pokemon Capture Simulator
 
-from random import randint
-from sys import maxint, argv
-import random
-from bisect import bisect
-import os, sys
+Simulate pokemon capture, base level module
+
+"""
+
+#pylint: disable=I0011,W0403
+from random import randint, choice
 from time import sleep
+import json
 from src.image import draw_ascii
+from src.pokemon_names import GEN_ONE
 
-directory = os.path.dirname(os.path.abspath(__file__))
+# Not all pokemon have catch rates, as they all cannot be caught in the wild.
+with open('src/pokemon.json') as open_file:
+    CATCH_RATE = json.load(open_file)
 
-gen1 = ['Bulbasaur','Ivysaur','Venusaur','Charmander','Charmeleon','Charizard','Squirtle','Wartortle','Blastoise','Caterpie','Metapod','Butterfree','Weedle','Kakuna','Beedrill','Pidgey','Pidgeotto','Pidgeot','Rattata','Raticate','Spearow','Fearow','Ekans','Arbok','Pikachu','Raichu','Sandshrew','Sandslash','Nidoran','Nidorina','Nidoqueen','Nidoran','Nidorino','Nidoking','Clefairy','Clefable','Vulpix','Ninetales','Jigglypuff','Wigglytuff','Zubat','Golbat','Oddish','Gloom','Vileplume','Paras','Parasect','Venonat','Venomoth','Diglett','Dugtrio','Meowth','Persian','Psyduck','Golduck','Mankey','Primeape','Growlithe','Arcanine','Poliwag','Poliwhirl','Poliwrath','Abra','Kadabra','Alakazam','Machop','Machoke','Machamp','Bellsprout','Weepinbell','Victreebel','Tentacool','Tentacruel','Geodude','Graveler','Golem','Ponyta','Rapidash','Slowpoke','Slowbro','Magnemite','Magneton','Farfetch\'d','Doduo','Dodrio','Seel','Dewgong','Grimer','Muk','Shellder','Cloyster','Gastly','Haunter','Gengar','Onix','Drowzee','Hypno','Krabby','Kingler','Voltorb','Electrode','Exeggcute','Exeggutor','Cubone','Marowak','Hitmonlee','Hitmonchan','Lickitung','Koffing','Weezing','Rhyhorn','Rhydon','Chansey','Tangela','Kangaskhan','Horsea','Seadra','Goldeen','Seaking','Staryu','Starmie','Mr. Mime','Scyther','Jynx','Electabuzz','Magmar','Pinsir','Tauros','Magikarp','Gyarados','Lapras','Ditto','Eevee','Vaporeon','Jolteon','Flareon','Porygon','Omanyte','Omastar','Kabuto','Kabutops','Aerodactyl','Snorlax','Articuno','Zapdos','Moltres','Dratini','Dragonair','Dragonite','Mewtwo','Mew']
-# Not all pokemon have catch rates, as they all cannot be caught in the wild. 
-catchRate = { 'Caterpie' : 255, 'Metapod' : 120, 'Butterfree' : 45, 'Weedle' : 255, 'Kakuna' : 120, 'Beedrill' : 45, 'Pidgey' : 255, 'Pidgeotto' : 120, 'Rattata' : 255, 'Raticate' : 127, 'Spearow' : 255, 'Fearow' : 90, 'Ekans' : 255, 'Arbok' : 90, 'Pikachu' : 190, 'Sandshrew' : 255, 'Sandslash' : 90, 'Nidoran' : 235, 'Nidorina' : 120, 'Nidoran' : 235, 'Nidorino' : 120, 'Clefairy' : 150, 'Vulpix' : 190, 'Jigglypuff' : 170, 'Zubat' : 255, 'Golbat' : 90, 'Oddish' : 255, 'Gloom' : 120, 'Paras' : 190, 'Parasect' : 75, 'Venonat' : 190, 'Venomoth' : 75, 'Diglett' : 255, 'Dugtrio' : 50, 'Meowth' : 255, 'Persian' : 90, 'Psyduck' : 190, 'Golduck' : 75, 'Mankey' : 190, 'Primeape' : 75, 'Growlithe' : 190, 'Poliwag' : 255, 'Poliwhirl' : 120, 'Poliwrath' : 45, 'Abra' : 200, 'Kadabra' : 100, 'Machop' : 180, 'Machoke' : 90, 'Bellsprout' : 255, 'Weepinbell' : 120, 'Tentacool' : 190, 'Tentacruel' : 60, 'Geodude' : 255, 'Graveler' : 120, 'Ponyta' : 190, 'Rapidash' : 60, 'Slowpoke' : 190, 'Slowbro' : 75, 'Magnemite' : 190, 'Magneton' : 60, 'Farfetch\'d' : 45, 'Doduo' : 190, 'Dodrio' : 45, 'Seel' : 190, 'Dewgong' : 75, 'Grimer' : 190, 'Muk' : 75, 'Shellder' : 190, 'Gastly' : 190, 'Haunter' : 90, 'Gengar' : 45, 'Onix' : 45, 'Drowzee' : 190, 'Hypno' : 75, 'Krabby' : 225, 'Kingler' : 60, 'Voltorb' : 190, 'Electrode' : 120, 'Exeggcute' : 90, 'Exeggutor' : 45, 'Cubone' : 190, 'Marowak' : 75, 'Hitmonlee' : 45, 'Hitmonchan' : 45, 'Lickitung' : 45, 'Koffing' : 190, 'Weezing' : 60, 'Rhyhorn' : 120, 'Rhydon' : 60, 'Chansey' : 30, 'Tangela' : 45, 'Kangaskhan' : 45, 'Horsea' : 225, 'Seadra' : 75, 'Goldeen' : 225, 'Seaking' : 60, 'Staryu' : 225, 'Starmie' : 60, 'Mr. Mime' : 45, 'Scyther' : 45, 'Jynx' : 45, 'Electabuzz' : 45, 'Magmar' : 45, 'Pinsir' : 45, 'Tauros' : 45, 'Magikarp' : 255, 'Gyarados' : 45, 'Lapras' : 45, 'Ditto' : 35, 'Eevee' : 45, 'Porygon' : 45, 'Snorlax' : 25, 'Articuno' : 3, 'Zapdos' : 3, 'Moltres' : 3, 'Dratini' : 45, 'Dragonair' : 45, 'Dragonite' : 45, 'Mewtwo' : 3, 'Mew' : 45  }
+def get_ball_val(ball):
+    """Pokeball random value
 
+    Gets the Pokeball random value N for the Pokeball type
 
-# Pokeball Constants
-def getBallVal(ball):
-	return {
-		'poke'  : randint(0,255),
-		'great' : randint(0,200),
-		'master': maxint
-			}.get(ball, randint(0,150))
+    Args:
+        ball: String of the pokeball type
 
-class Ailment():
-	def __init__(self):
-		choice = randint(0,3)
-		if choice == 0:
-			self.ailment = random.choice(['asleep','frozen'])
-			self.catchThesh = 25
-		elif choice == 1:
-			self.ailment = random.choice(['paralyzed','burned','poisoned'])
-			self.catchThesh = 12
-		else:
-			self.ailment = 'healthy'
-			self.catchThresh = 0
-	def getAilment(self):
-		return self.ailment
-	def getThresh(self):
-		return self.catchThesh
+    Returns:
+        Integer value from 0 to 255, 0 to 150 if the Pokeball is incorrect
+    """
+    return {
+        'poke': randint(0, 255),
+        'great': randint(0, 200),
+        'master': 255
+    }.get(ball, randint(0, 150))
 
-class Conditions():
-	def __init__(self,pokemon):
-		self.health = randint(1,100)
-		self.ailment = Ailment().getAilment()
-		self.name = pokemon
-		self.captureRate = catchRate.get(pokemon,100)
+class Ailment(object):
+    """The Ailment of a Pokemon
 
-	def printConditions(self):
-		print 'Health is at %d.'%self.health
-		print 'Opponent is currently %s.'%self.ailment if not self.ailment == 'none' else 'Opponent has no status ailments.'
+    Randomly generates values for Pokemon condition
 
-class Inventory():
-	def __init__(self, difficulty):
-		if difficulty == 'easy':
-			# make array in the next iteration
-			self.masterball =  1
-			self.pokeball   =  20
-			self.greatball  =  20
-			self.ultraball  =  20
-		
-		else:
-			self.masterball =  0
-			self.pokeball   =  5
-			self.greatball  =  5
-			self.ultraball  =  5
+    Attributes:
+        ailment: string effect on the Pokemon
+        catch_thresh: capture threshold integer value
+    """
 
-	def printInventory(self):
-		print '%d: %s: (%d)'%(1,'masterball',self.masterball)
-		print '%d: %s: (%d)'%(2,'pokeball',self.pokeball)
-		print '%d: %s: (%d)'%(3,'greatball',self.greatball)
-		print '%d: %s: (%d)'%(4,'ultraball',self.ultraball)
+    def __init__(self):
+        status_roll = randint(0, 3)
+        if status_roll == 0:
+            self.ailment = choice(['asleep', 'frozen'])
+            self.catch_thresh = 25
+        elif status_roll == 1:
+            self.ailment = choice(['paralyzed', 'burned', 'poisoned'])
+            self.catch_thresh = 12
+        else:
+            self.ailment = 'healthy'
+            self.catch_thresh = 0
 
-	def getBallAmountFromValue(self,value):
-		return {
-			1 : self.masterball,
-			2 : self.pokeball,
-			3 : self.greatball,
-			4 : self.ultraball
-		}
-	
-	def removeBall(self, choice):
-		if choice == 1:
-			print 'Ash threw a Masterball!'
-			self.masterball -= 1
-		elif choice == 2:
-			print 'Ash threw a pokeball!'
-			self.pokeball -= 1
-		elif choice == 3:
-			print 'Ash threw a greatball!'
-			self.greatball -= 1
-		elif choice == 4:
-			print 'Ash threw an ultraball!'
-			self.ultraball -= 1
-		else:
-			print 'how did you even let this happen?'
-			exit(1)
-			
+    def get_ailment(self):
+        """Getter: Ailment
+        Returns:
+            String ailment
+        """
+        return self.ailment
 
+    def get_thresh(self):
+        """Getter: Capture Threshold
+        Returns:
+            Integer capture threshold
+        """
+        return self.catch_thresh
 
+class Conditions(object):
+    """Condition of a Pokemon
 
-	# confusion is not taken into account for value
-	
+    The overall condition for capture
+
+    Attributes:
+        health: int, 1 to 100
+        ailment: string, Pokemon ailment
+        name: string, Pokemon name
+        capture_rate: capture rate per the Pokemon
+    """
+    def __init__(self, pokemon):
+        self.health = randint(1, 100)
+        self.ailment = Ailment().get_ailment()
+        self.name = pokemon
+        self.capture_rate = CATCH_RATE.get(pokemon, 100)
+
+    def print_conditions(self):
+        """Print Conditions
+
+        Used to relay information to use about pokemon condition
+        """
+        print 'Health is at %d.' % self.health
+        print 'Opponent is currently %s.' % self.ailment    \
+            if self.ailment != 'none'                       \
+            else 'Opponent has no status ailments.'
+
+class Inventory(object):
+    """The Player's Inventory
+
+    Based on the skill level of the player
+
+    Attributes:
+        masterball: int masterball amount
+        pokeball: int pokeball amount
+        greatball: int greatball amount
+        ultraball: int ultraball amount
+    """
+    def __init__(self, difficulty):
+        if difficulty == 'easy':
+            # make array in the next iteration
+            self.masterball = 1
+            self.pokeball = 20
+            self.greatball = 20
+            self.ultraball = 20
+        else:
+            self.masterball = 0
+            self.pokeball = 5
+            self.greatball = 5
+            self.ultraball = 5
+
+    def print_inventory(self):
+        """Prints Pokeball inventory"""
+        print '%d: %s: (%d)' % (1, 'masterball', self.masterball)
+        print '%d: %s: (%d)' % (2, 'pokeball', self.pokeball)
+        print '%d: %s: (%d)' % (3, 'greatball', self.greatball)
+        print '%d: %s: (%d)' % (4, 'ultraball', self.ultraball)
+
+    def get_ball_amount(self, value):
+        """Retrieves Pokeball amounts
+
+        Returns:
+            dict with ball amounts
+        """
+        return {
+            1 : self.masterball,
+            2 : self.pokeball,
+            3 : self.greatball,
+            4 : self.ultraball
+        }.get(value)
+
+    def use_ball(self, ball_choice):
+        """Use ball and update inventory
+        Args:
+            choice: int, ball choice
+        """
+        if ball_choice == 1:
+            print 'Ash threw a Masterball!'
+            self.masterball -= 1
+        elif ball_choice == 2:
+            print 'Ash threw a pokeball!'
+            self.pokeball -= 1
+        elif ball_choice == 3:
+            print 'Ash threw a greatball!'
+            self.greatball -= 1
+        elif ball_choice == 4:
+            print 'Ash threw an ultraball!'
+            self.ultraball -= 1
+        else:
+            print 'how did you even let this happen?'
+            exit(1)
 
 def main():
-	print '**********************POKEMON CAPTURE SIMULATOR***************************'
-	sleep(1)
+    """Main event loop"""
+    print '**********************POKEMON CAPTURE SIMULATOR***************************'
+    sleep(1)
 
-	correctChoice = False
-	choice = 'easy'
-	# while not correctChoice:
-	# 	choice = raw_input("Easy, or hard? ").lower()
-	# 	correctChoice = choice.find('easy') >= 0 or choice.find('hard') >= 0
+    # correct_choice = False
+    difficulty = 'easy'
+    # while not correctChoice:
+    # 	choice = raw_input("Easy, or hard? ").lower()
+    # 	correctChoice = choice.find('easy') >= 0 or choice.find('hard') >= 0
 
-	balls = Inventory(choice)
+    balls = Inventory(difficulty)
 
-	balls.printInventory()
+    balls.print_inventory()
 
-	pokemon = gen1[randint(0,len(gen1)-1)]
-	# pokemon = catchRate.keys().pop(randint(0,len(catchRate)-1))
-	print '%s\nA wild %s appeared!' % (draw_ascii(gen1.index(pokemon)+1),pokemon)
-	sleep(1)
-	print '\n<battle ensues>'
-	# for time in xrange(1,10):
-	# 	sys.stdout.write('.')
-	# 	sleep(.5)
+    pokemon = GEN_ONE[randint(0, len(GEN_ONE) - 1)]
+    # pokemon = catchRate.keys().pop(randint(0,len(catchRate)-1))
+    print '%s\nA wild %s appeared!' % (draw_ascii(GEN_ONE.index(pokemon) + 1), pokemon)
+    sleep(1)
+    print '\n<battle ensues>'
+    # for time in xrange(1,10):
+    # 	sys.stdout.write('.')
+    # 	sleep(.5)
 
-	opponent = Conditions(pokemon)
-	opponent.printConditions()
+    opponent = Conditions(pokemon)
+    opponent.print_conditions()
+    balls.print_inventory()
 
-	balls.printInventory()
+    choice_check = False
+    ball_choice = 0
+    while not choice_check:
+        ball_choice = int(raw_input('Select number of pokeball to throw! '))
+        choice_check = ball_choice >= 1 and ball_choice <= 4 and \
+            balls.get_ball_amount(ball_choice) > 0
+        if not choice_check:
+            print 'Incorrect entry. Try again'
 
-	choiceCheck = False
-	choice = 0
-	while not choiceCheck:
-		choice = int(raw_input('Select number of pokeball to throw! '))
-		choiceCheck = choice >= 1 and choice <= 4 and balls.getBallAmountFromValue(choice) > 0
-		if not choiceCheck:
-			print 'Incorrect entry. Try again'
+    balls.use_ball(ball_choice)
 
-	balls.removeBall(choice)
-
-	if capture(opponent, choice):
-		print 'Congratulations! you caught a %s!\n'%pokemon
-		choosy = int(raw_input('Catch another?: '))
-		if choosy == 1:
-			main()
-		else: 
-			exit(0)
-	else:
-		print 'Fuck! %s broke free!'%pokemon
-		sleep(1)
-		print '%s fled!'%pokemon
-		return 
+    if capture(opponent, ball_choice):
+        print 'Congratulations! you caught a %s!\n' % pokemon
+        choosy = int(raw_input('Catch another?: '))
+        if choosy == 1:
+            main()
+        else:
+            exit(0)
+    else:
+        print 'Fuck! %s broke free!' % pokemon
+        sleep(1)
+        print '%s fled!' % pokemon
+        return
 
 
 def capture(opponent, pokeball):
-	if pokeball == 1:
-		#no computation needed for a master ball
-		print '<shake left>'
-		sleep(1)
-		print '<shake right>'
-		sleep(1)
-		print '<shake left>'
-		sleep(1)
-		print '***click***'
-		sleep(1)
-		return True
-	return False
+    """Capture of a Pokemon
+
+    Here take into account the equation (TBD)
+
+    Returns:
+        Boolean if the Pokemon was captured or not
+    """
+    print opponent.name
+    if pokeball == 1:
+        #no computation needed for a master ball
+        print '<shake left>'
+        sleep(1)
+        print '<shake right>'
+        sleep(1)
+        print '<shake left>'
+        sleep(1)
+        print '***click***'
+        sleep(1)
+        return True
+    return False
 
 if __name__ == "__main__":
-	main()
+    main()

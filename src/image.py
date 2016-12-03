@@ -3,6 +3,7 @@
 Functions for creating ASCII art
 
 """
+
 #pylint: disable=I0011,E0401
 from bisect import bisect
 import os
