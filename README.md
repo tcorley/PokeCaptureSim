@@ -54,7 +54,7 @@
 
 ### Installation
 
-This works with Python 2.7 (Support for Python 3 incoming)
+This works with Python >= 3
 
 ```shell
 xcode-select --install

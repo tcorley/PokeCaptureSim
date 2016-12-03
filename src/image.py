@@ -4,7 +4,6 @@ Functions for creating ASCII art
 
 """
 
-#pylint: disable=I0011,E0401
 from bisect import bisect
 import os
 import random
@@ -43,6 +42,7 @@ ZONEBOUNDS = [36, 72, 108, 144, 180, 216, 252]
 # Constants
 VERBOSE = True
 
+
 def draw_ascii(num):
     """Creates ascii string of a Pokemon.
 
@@ -55,10 +55,10 @@ def draw_ascii(num):
     Returns:
         A string with the ASCII art.
     """
-    img_file = os.path.join(DIRECTORY, 'sprites', '%03d.png'%num)
+    img_file = os.path.join(DIRECTORY, 'sprites', '{:03d}.png'.format(num))
     image = Image.open(img_file)
     image = image.resize((104, 70), Image.BILINEAR)
-    image = image.convert('L') # convert to mono
+    image = image.convert('L')  # convert to mono
 
     # now, work our way over the pixels
     # build up str
@@ -69,7 +69,7 @@ def draw_ascii(num):
             lum = 255 - image.getpixel((pos_x, pos_y))
             row = bisect(ZONEBOUNDS, lum)
             possibles = GREYSCALE[row]
-            build_string = build_string + possibles[random.randint(0, len(possibles) - 1)]
+            build_string += possibles[random.randint(0, len(possibles) - 1)]
         build_string = build_string + '\n'
 
     check_string = build_string.split('\n')

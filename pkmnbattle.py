@@ -4,7 +4,6 @@ Simulate pokemon capture, base level module
 
 """
 
-#pylint: disable=I0011,W0403
 from random import randint, choice
 from time import sleep
 import json
@@ -14,6 +13,7 @@ from src.pokemon_names import GEN_ONE
 # Not all pokemon have catch rates, as they all cannot be caught in the wild.
 with open('src/pokemon.json') as open_file:
     CATCH_RATE = json.load(open_file)
+
 
 def get_ball_val(ball):
     """Pokeball random value
@@ -31,6 +31,7 @@ def get_ball_val(ball):
         'great': randint(0, 200),
         'master': 255
     }.get(ball, randint(0, 150))
+
 
 class Ailment(object):
     """The Ailment of a Pokemon
@@ -68,6 +69,7 @@ class Ailment(object):
         """
         return self.catch_thresh
 
+
 class Conditions(object):
     """Condition of a Pokemon
 
@@ -90,10 +92,12 @@ class Conditions(object):
 
         Used to relay information to use about pokemon condition
         """
-        print 'Health is at %d.' % self.health
-        print 'Opponent is currently %s.' % self.ailment    \
-            if self.ailment != 'none'                       \
-            else 'Opponent has no status ailments.'
+        print('Health is at {}'.format(self.health))
+        print('Opponent is currently {}'
+              .format(self.ailment
+                      if self.ailment != 'none'
+                      else 'Opponent has no status ailments.'))
+
 
 class Inventory(object):
     """The Player's Inventory
@@ -121,10 +125,10 @@ class Inventory(object):
 
     def print_inventory(self):
         """Prints Pokeball inventory"""
-        print '%d: %s: (%d)' % (1, 'masterball', self.masterball)
-        print '%d: %s: (%d)' % (2, 'pokeball', self.pokeball)
-        print '%d: %s: (%d)' % (3, 'greatball', self.greatball)
-        print '%d: %s: (%d)' % (4, 'ultraball', self.ultraball)
+        print('{}: {}: ({})'.format(1, 'masterball', self.masterball))
+        print('{}: {}: ({})'.format(2, 'pokeball', self.pokeball))
+        print('{}: {}: ({})'.format(3, 'greatball', self.greatball))
+        print('{}: {}: ({})'.format(4, 'ultraball', self.ultraball))
 
     def get_ball_amount(self, value):
         """Retrieves Pokeball amounts
@@ -133,10 +137,10 @@ class Inventory(object):
             dict with ball amounts
         """
         return {
-            1 : self.masterball,
-            2 : self.pokeball,
-            3 : self.greatball,
-            4 : self.ultraball
+            1: self.masterball,
+            2: self.pokeball,
+            3: self.greatball,
+            4: self.ultraball
         }.get(value)
 
     def use_ball(self, ball_choice):
@@ -145,24 +149,25 @@ class Inventory(object):
             choice: int, ball choice
         """
         if ball_choice == 1:
-            print 'Ash threw a Masterball!'
+            print('Ash threw a Masterball!')
             self.masterball -= 1
         elif ball_choice == 2:
-            print 'Ash threw a pokeball!'
+            print('Ash threw a pokeball!')
             self.pokeball -= 1
         elif ball_choice == 3:
-            print 'Ash threw a greatball!'
+            print('Ash threw a greatball!')
             self.greatball -= 1
         elif ball_choice == 4:
-            print 'Ash threw an ultraball!'
+            print('Ash threw an ultraball!')
             self.ultraball -= 1
         else:
-            print 'how did you even let this happen?'
+            print('how did you even let this happen?')
             exit(1)
+
 
 def main():
     """Main event loop"""
-    print '**********************POKEMON CAPTURE SIMULATOR***************************'
+    print('******************POKEMON CAPTURE SIMULATOR***********************')
     sleep(1)
 
     # correct_choice = False
@@ -177,9 +182,11 @@ def main():
 
     pokemon = GEN_ONE[randint(0, len(GEN_ONE) - 1)]
     # pokemon = catchRate.keys().pop(randint(0,len(catchRate)-1))
-    print '%s\nA wild %s appeared!' % (draw_ascii(GEN_ONE.index(pokemon) + 1), pokemon)
+    print('{}\nA wild {} appeared!'
+          .format(draw_ascii(GEN_ONE.index(pokemon) + 1),
+                  pokemon))
     sleep(1)
-    print '\n<battle ensues>'
+    print('\n<battle ensues>')
     # for time in xrange(1,10):
     # 	sys.stdout.write('.')
     # 	sleep(.5)
@@ -191,25 +198,25 @@ def main():
     choice_check = False
     ball_choice = 0
     while not choice_check:
-        ball_choice = int(raw_input('Select number of pokeball to throw! '))
+        ball_choice = int(input('Select number of pokeball to throw! '))
         choice_check = ball_choice >= 1 and ball_choice <= 4 and \
             balls.get_ball_amount(ball_choice) > 0
         if not choice_check:
-            print 'Incorrect entry. Try again'
+            print('Incorrect entry. Try again')
 
     balls.use_ball(ball_choice)
 
     if capture(opponent, ball_choice):
-        print 'Congratulations! you caught a %s!\n' % pokemon
-        choosy = int(raw_input('Catch another?: '))
+        print('Congratulations! you caught a {}!\n'.format(pokemon))
+        choosy = int(input('Catch another?: '))
         if choosy == 1:
             main()
         else:
             exit(0)
     else:
-        print 'Fuck! %s broke free!' % pokemon
+        print('Fuck! {} broke free!'.format(pokemon))
         sleep(1)
-        print '%s fled!' % pokemon
+        print('{} fled!'.format(pokemon))
         return
 
 
@@ -221,16 +228,16 @@ def capture(opponent, pokeball):
     Returns:
         Boolean if the Pokemon was captured or not
     """
-    print opponent.name
+    print(opponent.name)
     if pokeball == 1:
-        #no computation needed for a master ball
-        print '<shake left>'
+        # no computation needed for a master ball
+        print('<shake left>')
         sleep(1)
-        print '<shake right>'
+        print('<shake right>')
         sleep(1)
-        print '<shake left>'
+        print('<shake left>')
         sleep(1)
-        print '***click***'
+        print('***click***')
         sleep(1)
         return True
     return False
