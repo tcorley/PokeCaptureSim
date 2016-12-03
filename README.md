@@ -62,6 +62,8 @@ brew install libjpeg
 pip install -r requirements.txt
 ```
 
-### Links
+### Resources
 
 * [Generation I Capture Method](http://bulbapedia.bulbagarden.net/wiki/Catch_rate#Capture_method_.28Generation_I.29)
+* [ASCII Art Generator from Images](https://www.hackerearth.com/practice/notes/beautiful-python-a-simple-ascii-art-generator-from-images/)
+* [Pokemon Red/Blue Sprites](http://pkmn.net/?action=content&page=viewpage&id=8544)
