@@ -3,43 +3,13 @@
 
 from random import randint
 from sys import maxint, argv
-from PIL import Image
 import random
 from bisect import bisect
 import os, sys
 from time import sleep
+from src.image import draw_ascii
 
 directory = os.path.dirname(os.path.abspath(__file__))
-
-# greyscale.. the following strings represent
-# 7 tonal ranges, from lighter to darker.
-# for a given pixel tonal level, choose a character
-# at random from that range.
-
-greyscale = [
-			" ",
-			" ",
-			".,-",
-			"_ivc=!/|\\~",
-			"gjez2]/(YL)t[+T7Vf",
-			"mdK4ZGbNDXY5P*Q",
-			"W8KMA",
-			"#%$"
-			]
- 
-# using the bisect class to put luminosity values
-# in various ranges.
-# these are the luminosity cut-off points for each
-# of the 7 tonal levels. At the moment, these are 7 bands
-# of even width, but they could be changed to boost
-# contrast or change gamma, for example.
- 
-zonebounds=[36,72,108,144,180,216,252]
- 
-# open image and resize
-# experiment with aspect ratios according to font
-# Constants
-VERBOSE = True
 
 gen1 = ['Bulbasaur','Ivysaur','Venusaur','Charmander','Charmeleon','Charizard','Squirtle','Wartortle','Blastoise','Caterpie','Metapod','Butterfree','Weedle','Kakuna','Beedrill','Pidgey','Pidgeotto','Pidgeot','Rattata','Raticate','Spearow','Fearow','Ekans','Arbok','Pikachu','Raichu','Sandshrew','Sandslash','Nidoran','Nidorina','Nidoqueen','Nidoran','Nidorino','Nidoking','Clefairy','Clefable','Vulpix','Ninetales','Jigglypuff','Wigglytuff','Zubat','Golbat','Oddish','Gloom','Vileplume','Paras','Parasect','Venonat','Venomoth','Diglett','Dugtrio','Meowth','Persian','Psyduck','Golduck','Mankey','Primeape','Growlithe','Arcanine','Poliwag','Poliwhirl','Poliwrath','Abra','Kadabra','Alakazam','Machop','Machoke','Machamp','Bellsprout','Weepinbell','Victreebel','Tentacool','Tentacruel','Geodude','Graveler','Golem','Ponyta','Rapidash','Slowpoke','Slowbro','Magnemite','Magneton','Farfetch\'d','Doduo','Dodrio','Seel','Dewgong','Grimer','Muk','Shellder','Cloyster','Gastly','Haunter','Gengar','Onix','Drowzee','Hypno','Krabby','Kingler','Voltorb','Electrode','Exeggcute','Exeggutor','Cubone','Marowak','Hitmonlee','Hitmonchan','Lickitung','Koffing','Weezing','Rhyhorn','Rhydon','Chansey','Tangela','Kangaskhan','Horsea','Seadra','Goldeen','Seaking','Staryu','Starmie','Mr. Mime','Scyther','Jynx','Electabuzz','Magmar','Pinsir','Tauros','Magikarp','Gyarados','Lapras','Ditto','Eevee','Vaporeon','Jolteon','Flareon','Porygon','Omanyte','Omastar','Kabuto','Kabutops','Aerodactyl','Snorlax','Articuno','Zapdos','Moltres','Dratini','Dragonair','Dragonite','Mewtwo','Mew']
 # Not all pokemon have catch rates, as they all cannot be caught in the wild. 
@@ -150,7 +120,7 @@ def main():
 
 	pokemon = gen1[randint(0,len(gen1)-1)]
 	# pokemon = catchRate.keys().pop(randint(0,len(catchRate)-1))
-	print '%s\nA wild %s appeared!' % (drawASCII(gen1.index(pokemon)+1),pokemon)
+	print '%s\nA wild %s appeared!' % (draw_ascii(gen1.index(pokemon)+1),pokemon)
 	sleep(1)
 	print '\n<battle ensues>'
 	# for time in xrange(1,10):
@@ -200,39 +170,5 @@ def capture(opponent, pokeball):
 		return True
 	return False
 
-
-
-
-
-def drawASCII(num):
-	# im=Image.open(r"/Users/Tyler_iMac/Downloads/Sprites/151.png")
-	#im=Image.open(r"/Users/Tyler_iMac/Downloads/Sprites/%03d.png"%num)
-	file = os.path.join(directory, 'sprites', '%03d.png'%num)
-	im = Image.open(file)
-	# im=im.resize((n+85, n),Image.BILINEAR)
-	# im=im.resize((40, 19),Image.BILINEAR)
-	im=im.resize((104, 70),Image.BILINEAR)
-	im=im.convert("L") # convert to mono
-	 
-	# now, work our way over the pixels
-	# build up str
-	 
-	str=""
-	for y in range(0,im.size[1]):
-		for x in range(0,im.size[0]):
-			lum=255-im.getpixel((x,y))
-			row=bisect(zonebounds,lum)
-			possibles=greyscale[row]
-			str=str+possibles[random.randint(0,len(possibles)-1)]
-		str=str+"\n"
-	 
-	checkString = str.split('\n')
-	for string in checkString:
-		if(string.isspace()):
-			checkString.pop(checkString.index(string))
-	return '\n'.join(checkString)
-
-
 if __name__ == "__main__":
 	main()
-

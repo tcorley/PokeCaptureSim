@@ -61,3 +61,7 @@ xcode-select --install
 brew install libjpeg
 pip install -r requirements.txt
 ```
+
+### Links
+
+* [Generation I Capture Method](http://bulbapedia.bulbagarden.net/wiki/Catch_rate#Capture_method_.28Generation_I.29)
